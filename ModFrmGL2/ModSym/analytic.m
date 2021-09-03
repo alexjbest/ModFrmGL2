@@ -240,7 +240,7 @@ end function;
 // an explicit formula derived via integration by parts.   //
 /////////////////////////////////////////////////////////////
 function Int2(f, alp, m, N, sigma)
-    C := ComplexField();
+    C := ComplexField(100);
     return &+[Int1(alp,m,n/N,C)*sigma(Coefficient(f,n)) : n in [1..Degree(f)]];
 end function;
 
@@ -248,7 +248,7 @@ function PeriodIntegral(f, P, alpha, N : sigma := 1)
    // {Computes <f, P\{alpha,oo\}> = -2*pi*I*Int_{alp}^{oo} P(z) f(q) dz
    // for alpha any point 
    // in the upper half plane.}
-    C := ComplexField(); i := C.1;
+    C := ComplexField(100); i := C.1;
     if (Type(sigma) eq RngIntElt) and (sigma eq 1) then
 	sigma := hom<Rationals() -> C|>;
     end if;
@@ -281,13 +281,13 @@ function FastPeriodIntegral(A, f, Pg)
    assert giP eq P;
 
 
-   C := ComplexField(); i := C.1;
+   C := ComplexField(100); i := C.1;
 
    N    := Level(A);
    k    := Weight(A);
    e    := AtkinLehnerSign(A);
    rootN:= Sqrt(Level(A));
-   PI   := Pi(ComplexField());
+   PI   := Pi(ComplexField(100));
    a    := g[1]; 
    b    := g[2]; 
    c    := g[3] div N; 
@@ -347,7 +347,7 @@ function SlowPeriodIntegral(A, f, Pg : sigma := 1)
    phi  := hom <R -> R  |  g[1]*R.1+g[2]*R.2, g[3]*R.1+g[4]*R.2>; 
    giP  := phi(P) / (g[1]*g[4]-g[2]*g[3]);
 
-   C := ComplexField(); i := C.1;
+   C := ComplexField(100); i := C.1;
 
    if g[3] lt 0 then   // g(oo) = (-g)(oo), since g acts through PSL.
       g[1] *:= -1; g[2] *:= -1; g[3] *:= -1; g[4] *:= -1;
@@ -567,7 +567,7 @@ function PeriodGenerators(A, fast)
 end function;
 
 intrinsic PeriodMapping(A::ModSym, Q::SeqEnum[RngSerPowElt] : 
-			sigma := 1, prec := 30) -> Map
+			sigma := 1, prec := 100) -> Map
 {The complex period mapping, computed using n terms of q-expansion.  
  The period map is a homomorphism M --> C^d, where d = #Q.}
 
@@ -660,7 +660,7 @@ intrinsic PeriodMapping(A::ModSym, prec::RngIntElt) -> Map
          require #Q eq dim : "The precision ( =", prec, ") is too low";
       end if;
       vprint ModularSymbols : "Found integral basis, now creating C^d.";
-      C := ComplexField(); i := C.1;
+      C := ComplexField(100); i := C.1;
       Cd := VectorSpace(C,DimensionComplexTorus(A)*Degree(BaseField(A)));
 
       if fast then
@@ -694,7 +694,7 @@ intrinsic PeriodMapping(A::ModSym, prec::RngIntElt) -> Map
                        coord is Coordinates(V, pi(b)) 
             :        b in Basis(DualRepresentation(M))  ];
       A`PeriodMapPrecision := n;
-      W := VectorSpace(ComplexField(),Degree(IMAGES[1]));
+      W := VectorSpace(ComplexField(100),Degree(IMAGES[1]));
 
       A`PeriodMap := hom<AmbientSpace(A)->W | x :-> &+[y[i]*IMAGES[i] : i in [1..#y]] where
                                  y := Eltseq(x)>;
@@ -708,10 +708,11 @@ intrinsic Periods(M::ModSym, n::RngIntElt) -> SeqEnum
 {The complex period lattice associated to A using n terms of the q-expansions.}
    require Sign(M) eq 0 : "Argument 1 must have sign 0.";
    require IsCuspidal(M) : "Argument 1 must be cuspidal.";
-   require Type(BaseField(M)) eq FldRat : "The base ring of M must be the rational field.";
+   //require Type(BaseField(M)) eq FldRat : "The base ring of M must be the rational field.";
    
    if not assigned M`period_lattice  or M`PeriodMapPrecision lt n then
-      phi := PeriodMapping(M,n);  // compute to precision n.
+      Q  := qIntegralBasis(M, n);
+      phi := PeriodMapping(M,Q : prec:=n);  // compute to precision n.
       pi := RationalMapping(M);
       L,psi := Lattice(CuspidalSubspace(AmbientSpace(M)));
       piL := [pi(psi(x)) : x in Basis(L)];
@@ -852,7 +853,7 @@ intrinsic LSeries(M::ModSym, j::RngIntElt, n::RngIntElt)
    */
    vprintf ModularSymbols, 1: "Computing LSeries(M,%o,%o)...\n",j,n;
 
-   C := ComplexField(); i := C.1;
+   C := ComplexField(100); i := C.1;
    R<X,Y> := PolynomialRing(Rationals(),2);
 
    // In PeriodMaping, prec needs to be large enough that #qIntegralBasis(M,prec) = dim
@@ -890,7 +891,7 @@ intrinsic LSeries(M::ModSym, j::RngIntElt, n::RngIntElt)
    // Q: Field over which the linear combination is defined
    Q      := Parent(e[1]);
    // PC: Polynomial ring in one variable over C.
-   PC := PolynomialRing(ComplexField()); a := PC.1;
+   PC := PolynomialRing(ComplexField(100)); a := PC.1;
    // g: Q = Q[x]/(g)
    g      := Modulus(Q);
    // P: Q[x]
@@ -943,7 +944,7 @@ intrinsic ClassicalPeriod(M::ModSym, j::RngIntElt, n::RngIntElt)
    end if;
 */
 
-   C := ComplexField(); i := C.1;
+   C := ComplexField(100); i := C.1;
    return Factorial(j)*i^(j+1)*(2*Pi(C))^(-(j+1))*
             LSeries(M,j+1,n);
 end intrinsic;
